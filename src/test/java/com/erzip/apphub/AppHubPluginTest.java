@@ -1,4 +1,4 @@
-package run.halo.starter;
+package com.erzip.apphub;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -8,13 +8,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import run.halo.app.plugin.PluginContext;
 
 @ExtendWith(MockitoExtension.class)
-class StarterPluginTest {
-
+public class AppHubPluginTest {
     @Mock
     PluginContext context;
 
     @InjectMocks
-    StarterPlugin plugin;
+    AppHubPlugin plugin;
 
     @Test
     void contextLoads() {
