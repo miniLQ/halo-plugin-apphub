@@ -1,0 +1,10 @@
+apiVersion: plugin.halo.run/v1alpha1
+kind: ReverseProxy
+metadata:
+  # 为了避免与其他插件冲突，推荐带上插件名称前缀
+  name: apphub-assets-reverse-proxy
+rules:
+  - path: /res/**
+    file:
+      directory: static
+      # 如果想代理 static 下所有静态资源则省略 filename 配置

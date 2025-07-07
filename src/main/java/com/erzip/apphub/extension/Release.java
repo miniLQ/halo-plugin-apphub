@@ -55,7 +55,6 @@ public class Release extends AbstractExtension {
     }
 
 
-
     @Data
     public static class ReleaseStatus{
         @Schema(description = "发布时间戳", example = "2025-06-17T07:48:38.457152531Z")
