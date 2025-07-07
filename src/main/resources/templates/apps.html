@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="|${title} - ${site.title}|"></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6366f1',
+                        secondary: '#8b5cf6',
+                        section: '#f7f8ff'
+                    },
+                    borderRadius: {
+                        'none': '0px',
+                        'sm': '2px',
+                        DEFAULT: '4px',
+                        'md': '8px',
+                        'lg': '12px',
+                        'xl': '16px',
+                        '2xl': '20px',
+                        '3xl': '24px',
+                        'full': '9999px',
+                        'button': '4px'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f9fafb 0%, #f0f4ff 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 15px 30px rgba(99, 102, 241, 0.15);
+        }
+        .mobile-menu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .mobile-menu.active {
+            max-height: 500px;
+        }
+        .aspect-theme {
+            aspect-ratio: 16/9;
+        }
+        .aspect-plugin {
+            aspect-ratio: 16/10;
+        }
+        .section-card {
+            background: linear-gradient(145deg, #ffffff, #f7f8ff);
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.1);
+            transition: all 0.3s ease;
+        }
+        .section-card:hover {
+            box-shadow: 0 12px 40px rgba(99, 102, 241, 0.15);
+        }
+        .header-logo {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            box-shadow: 0 4px 6px rgba(99, 102, 241, 0.3);
+        }
+        .price-tag {
+            background: rgba(99, 102, 241, 0.1);
+            color: #6366f1;
+            border-radius: 16px;
+            padding: 2px 10px;
+            font-weight: 600;
+        }
+        .featured-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+            color: white;
+            font-size: 0.75rem;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+        .free-badge {
+            background: linear-gradient(135deg, #10b981, #06b6d4);
+        }
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 60px 30px;
+            border-radius: 20px;
+            background: linear-gradient(145deg, #f8f9ff, #f0f4ff);
+            min-height: 400px;
+            position: relative;
+            overflow: hidden;
+        }
+        .empty-state::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(to right, #ffffff, #c7c7c700);
+        }
+        .empty-icon {
+            font-size: 80px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+        .empty-btn {
+            margin-top: 25px;
+            padding: 12px 28px;
+            background: linear-gradient(to right, #6366f1, #8b5cf6);
+            color: white;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 16px;
+            box-shadow: 0 6px 15px rgba(99, 102, 241, 0.3);
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+        }
+        .empty-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+        }
+        .empty-state-content {
+            position: relative;
+            z-index: 2;
+            max-width: 500px;
+        }
+        .empty-state-bg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.03;
+            font-size: 200px;
+            z-index: 1;
+        }
+        @media (max-width: 768px) {
+            .empty-icon {
+                font-size: 60px;
+            }
+            .empty-state-bg {
+                font-size: 150px;
+            }
+        }
+        @media (max-width: 640px) {
+            .card-hover:hover {
+                transform: none;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            }
+            .section-card {
+                border-radius: 16px;
+            }
+            .empty-icon {
+                font-size: 50px;
+            }
+            .empty-state {
+                padding: 40px 20px;
+                min-height: 300px;
+            }
+            .empty-state-bg {
+                font-size: 120px;
+            }
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+<div class="max-w-[1440px] mx-auto">
+    <!-- 简化后的导航栏 -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+            <div class="flex items-center justify-between w-full md:w-auto">
+                <div class="flex items-center">
+                    <div class="header-logo w-10 h-10 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-palette text-white"></i>
+                    </div>
+                    <h1 class="text-xl md:text-2xl font-bold" th:text="${title}"></h1>
+                </div>
+
+                <!-- 移动端汉堡菜单按钮 -->
+                <button id="mobile-menu-button" class="md:hidden text-gray-600 hover:text-primary focus:outline-none">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+
+            <!-- PC端导航 - 只保留星风之痕链接 -->
+            <div class="hidden md:flex items-center">
+                <a th:href="${site.url}" class="text-gray-600 hover:text-primary transition-colors font-medium" th:text="${site.title}"></a>
+            </div>
+        </nav>
+
+        <!-- 移动端导航菜单 - 简化 -->
+        <div id="mobile-menu" class="mobile-menu md:hidden bg-white shadow-lg">
+            <div class="container mx-auto px-4 py-4 flex flex-col space-y-4">
+                <a href="https://erzip.com" class="text-gray-600 hover:text-primary transition-colors py-2 border-b border-gray-100 font-medium">星风之痕</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 py-8 md:py-12">
+        <!-- 主题部分 -->
+        <section class="mb-12 md:mb-16">
+            <div class="section-card p-6 md:p-8">
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8">
+                    <h2 class="text-2xl md:text-3xl font-bold mb-2 md:mb-0">主题</h2>
+                    <div class="flex items-center">
+                        <span class="text-gray-600 mr-3">标签：</span>
+                        <div class="flex space-x-2">
+                            <span class="bg-blue-100 text-primary text-xs px-3 py-1.5 rounded-full font-medium">Halo</span>
+<!--                            <span class="bg-purple-100 text-secondary text-xs px-3 py-1.5 rounded-full font-medium">企业</span>-->
+<!--                            <span class="bg-yellow-100 text-yellow-700 text-xs px-3 py-1.5 rounded-full font-medium">博客</span>-->
+                        </div>
+                    </div>
+                </div>
+
+                <div id="themes-container">
+                    <!-- 空状态提示 (默认显示) -->
+                    <div id="empty-themes" class="empty-state" th:if="${#lists.isEmpty(themes)}">
+                        <div class="empty-state-content">
+                            <i class="fas fa-paint-brush empty-icon"></i>
+                            <h3 class="text-2xl md:text-3xl font-bold text-gray-800 mb-3">暂无主题</h3>
+                            <p class="text-gray-600 text-lg mb-4 max-w-md">当前没有可用的主题，正在努力创作中</p>
+                            <p class="text-gray-500 text-sm mb-6">敬请期待！</p>
+                        </div>
+                        <div class="empty-state-bg">
+                            <i class="fas fa-paint-brush"></i>
+                        </div>
+                    </div>
+
+                    <!-- 正常状态 - 主题卡片 (默认隐藏) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" th:unless="${#lists.isEmpty(themes)}">
+                        <!-- 主题卡片 1 -->
+                        <th:block th:each="theme : ${themes}">
+                            <div class="bg-white rounded-xl shadow-md p-5 transition-all duration-300 card-hover relative">
+                                <!--                            <div class="featured-badge">精选</div>-->
+                                <div class="aspect-theme overflow-hidden rounded-lg mb-4">
+                                    <img th:src="${theme.spec.cover}" th:alt="${theme.spec.displayName}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105">
+                                </div>
+                                <div class="mb-3">
+                                    <h3 class="text-lg font-bold mb-1" th:text="${theme.spec.displayName}"></h3>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="bg-blue-100 text-primary text-xs px-2 py-1 rounded">Halo</span>
+                                        <span class="bg-purple-100 text-secondary text-xs px-2 py-1 rounded">主题</span>
+                                    </div>
+                                </div>
+                                <p class="text-gray-600 text-sm mb-4" th:text="${theme.spec.description}"></p>
+                                <div class="flex items-center justify-between">
+                                    <span class="price-tag" th:text="
+                                    ${
+                                    theme.spec.deprecated ? '已下架' : (!theme.spec.publish ? '暂未发布'
+                                    : (theme.spec.priceConfig.mode.toString() == 'FREE' ? '免费' : ('¥'+theme.spec.priceConfig.oneTimePrice)))
+                                    }
+                                    "></span>
+                                    <a th:href="@{/apps/{name}(name=${theme.metadata.name})}"
+                                            class="bg-gradient-to-r from-primary to-secondary text-white px-5 py-2 rounded-lg hover:opacity-90 transition-opacity text-sm">
+                                        立即获取
+                                    </a>
+                                </div>
+                            </div>
+                        </th:block>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 插件部分 -->
+        <section>
+            <div class="section-card p-6 md:p-8">
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8">
+                    <div>
+                        <h2 class="text-2xl md:text-3xl font-bold mb-2">精选插件</h2>
+                        <p class="text-gray-600 text-lg">丰富的功能扩展，让您的网站焕然一新</p>
+                    </div>
+                    <div class="flex items-center mt-4 md:mt-0">
+                        <span class="text-gray-600 mr-3">标签：</span>
+                        <div class="flex space-x-2">
+                            <span class="bg-blue-100 text-primary text-xs px-3 py-1.5 rounded-full font-medium">Halo</span>
+<!--                            <span class="bg-purple-100 text-secondary text-xs px-3 py-1.5 rounded-full font-medium">安全</span>-->
+<!--                            <span class="bg-yellow-100 text-yellow-700 text-xs px-3 py-1.5 rounded-full font-medium">社交</span>-->
+                        </div>
+                    </div>
+                </div>
+
+                <div id="plugins-container">
+                    <!-- 空状态提示 (默认显示) -->
+                    <div id="empty-plugins" class="empty-state" th:if="${#lists.isEmpty(plugins)}">
+                        <div class="empty-state-content">
+                            <i class="fas fa-puzzle-piece empty-icon"></i>
+                            <h3 class="text-2xl md:text-3xl font-bold text-gray-800 mb-3">暂无插件</h3>
+                            <p class="text-gray-600 text-lg mb-4 max-w-md">当前没有可用的插件，正在努力开发中</p>
+                            <p class="text-gray-500 text-sm mb-6">敬请期待！</p>
+                        </div>
+                        <div class="empty-state-bg">
+                            <i class="fas fa-puzzle-piece"></i>
+                        </div>
+                    </div>
+
+                    <!-- 正常状态 - 插件卡片 (默认隐藏) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" th:unless="${#lists.isEmpty(plugins)}">
+                        <!-- 插件卡片 1 -->
+                        <th:block th:each="plugin : ${plugins}">
+                            <div class="bg-white rounded-xl shadow-md p-5 transition-all duration-300 card-hover relative">
+                                <!--                            <div class="featured-badge free-badge">免费</div>-->
+                                <div class="aspect-plugin overflow-hidden rounded-lg mb-4">
+                                    <img th:src="${plugin.spec.cover}" th:alt="${plugin.spec.displayName}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105">
+                                </div>
+                                <h3 class="text-lg font-bold mb-2" th:text="${plugin.spec.displayName}"></h3>
+                                <p class="text-gray-600 text-sm mb-4" th:text="${plugin.spec.description}"></p>
+                                <div class="flex items-center justify-between">
+                                    <span class="price-tag" th:text="
+                                    ${
+                                    plugin.spec.deprecated ? '已下架' : (!plugin.spec.publish ? '暂未发布'
+                                    : (plugin.spec.priceConfig.mode.toString() == 'FREE' ? '免费' : ('¥'+plugin.spec.priceConfig.oneTimePrice)))
+                                    }
+                                    "></span>
+
+                                    <a th:href="@{/apps/{name}(name=${plugin.metadata.name})}"
+                                       class="bg-gradient-to-r from-primary to-secondary text-white px-5 py-2 rounded-lg hover:opacity-90 transition-opacity text-sm inline-block">
+                                        立即获取
+                                    </a>
+                                </div>
+                            </div>
+                        </th:block>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 简化页脚 -->
+    <footer class="bg-gray-50 border-t mt-16 py-6">
+        <div class="container mx-auto px-4 sm:px-6">
+            <div class="text-center text-gray-500 text-sm">
+                &copy; 2025 星风之痕.保留所有权利.
+            </div>
+        </div>
+    </footer>
+</div>
+
+<!-- 移动菜单切换脚本 -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 移动菜单功能
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuIcon = mobileMenuButton.querySelector('i');
+
+        mobileMenuButton.addEventListener('click', function() {
+            mobileMenu.classList.toggle('active');
+
+            if (mobileMenu.classList.contains('active')) {
+                menuIcon.classList.remove('fa-bars');
+                menuIcon.classList.add('fa-times');
+            } else {
+                menuIcon.classList.remove('fa-times');
+                menuIcon.classList.add('fa-bars');
+            }
+        });
+
+        // 关闭菜单当点击外部区域
+        document.addEventListener('click', function(event) {
+            const isClickInsideMenu = mobileMenu.contains(event.target);
+            const isClickInsideButton = mobileMenuButton.contains(event.target);
+
+            if (!isClickInsideMenu && !isClickInsideButton && mobileMenu.classList.contains('active')) {
+                mobileMenu.classList.remove('active');
+                menuIcon.classList.remove('fa-times');
+                menuIcon.classList.add('fa-bars');
+            }
+        });
+    });
+</script>
+</body>
+</html>

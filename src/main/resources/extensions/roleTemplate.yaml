@@ -1,0 +1,30 @@
+apiVersion: v1alpha1
+kind: Role
+metadata:
+  name: role-template-apphubs-view
+  labels:
+    halo.run/role-template: "true"
+  annotations:
+    rbac.authorization.halo.run/module: "应用"
+    rbac.authorization.halo.run/ui-permissions: '["plugin:apphubs:view"]'
+    rbac.authorization.halo.run/display-name: "应用查看"
+rules:
+  - apiGroups: [ "core.erzip.com", "console.api.apphub.erzip.com"]
+    resources: [ "releases", "applications", "applicationcomments"]
+    verbs: [ "get", "list"]
+---
+apiVersion: v1alpha1
+kind: Role
+metadata:
+  name: role-template-apphubs-manage
+  labels:
+    halo.run/role-template: "true"
+  annotations:
+    rbac.authorization.halo.run/dependencies: '["role-template-apphubs-view"]'
+    rbac.authorization.halo.run/ui-permissions: '["plugin:apphubs:manage"]'
+    rbac.authorization.halo.run/module: "应用"
+    rbac.authorization.halo.run/display-name: "应用管理"
+rules:
+  - apiGroups: [ "core.erzip.com", "console.api.apphub.erzip.com"]
+    resources: [ "releases", "applications", "applicationcomments","download","app"]
+    verbs: [ "create", "patch", "update", "delete", "deletecollection" ]

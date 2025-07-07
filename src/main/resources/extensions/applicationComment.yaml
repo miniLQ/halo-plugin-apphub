@@ -1,0 +1,6 @@
+apiVersion: core.erzip.com/v1alpha1
+kind: ApplicationComment
+metadata:
+  name: plugin-application-comment
+spec:
+  haloCommentEnabled: true

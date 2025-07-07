@@ -1,29 +1,47 @@
-import { definePlugin } from '@halo-dev/console-shared'
-import HomeView from './views/HomeView.vue'
-import { IconPlug } from '@halo-dev/components'
-import { markRaw } from 'vue'
+import { definePlugin, type CommentSubjectRefProvider, type CommentSubjectRefResult } from "@halo-dev/console-shared";
+import { markRaw } from "vue";
+import AppList from "@/views/AppList.vue";
+import type { Extension } from "@halo-dev/api-client";
+import RiApps2Line from "~icons/ri/apps-2-line"
 
 export default definePlugin({
   components: {},
   routes: [
     {
-      parentName: 'Root',
+      parentName: "Root",
       route: {
-        path: '/example',
-        name: 'Example',
-        component: HomeView,
+        path: "/apps",
+        name: "Apps",
+        component: AppList,
         meta: {
-          title: '示例页面',
-          searchable: true,
+          permissions: ["plugin:apphubs:view"],
           menu: {
-            name: '示例页面',
-            group: '示例分组',
-            icon: markRaw(IconPlug),
-            priority: 0,
+            name: "应用舱",
+            group: "content",
+            icon: markRaw(RiApps2Line),
           },
         },
       },
     },
   ],
-  extensionPoints: {},
-})
+  extensionPoints: {
+    "comment:subject-ref:create": (): CommentSubjectRefProvider[] => {
+      return [
+        {
+          kind: "ApplicationComment",
+          group: "core.erzip.com",
+          resolve: (subject: Extension): CommentSubjectRefResult => {
+            return {
+              label: "应用舱",
+              title: "应用舱页面",
+              externalUrl: "/apps",
+              route: {
+                name: "Apps",
+              },
+            };
+          },
+        },
+      ];
+    },
+  },
+});

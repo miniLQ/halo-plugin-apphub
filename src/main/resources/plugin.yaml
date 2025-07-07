@@ -11,10 +11,12 @@ spec:
   author:
     name: 星风之痕
     website: hhttps://github.com/springai/halo-plugin-apphub
-  logo: logo.png
+  logo: logo.svg
   homepage: https://github.com/springai/halo-plugin-apphub#readme
   repo: https://github.com/springai/halo-plugin-apphub
   issues: https://github.com/springai/halo-plugin-apphub/issues
+  configMapName: plugin-apphubs-configmap
+  settingName: plugin-apphubs-settings
   displayName: "plugin-apphub"
   description: "Halo应用舱后台管理"
   license:

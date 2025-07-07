@@ -1,0 +1,228 @@
+<script lang="ts" setup>
+import type {Application, ApplicationList} from "@/types";
+import { axiosInstance } from "@halo-dev/api-client";
+
+import {
+  Dialog,
+  IconList,
+  VButton,
+  VCard,
+  VDropdownItem,
+  VEmpty,
+  VEntity,
+  VEntityField,
+  VLoading,
+  VStatusDot,
+} from "@halo-dev/components";
+import { useQuery } from "@tanstack/vue-query";
+import { useRouteQuery } from "@vueuse/router";
+import {computed, ref, watch} from "vue";
+import { VueDraggable } from "vue-draggable-plus";
+import ApplicationEditingModal from "./ApplicationEditingModal.vue";
+
+const emit = defineEmits<{
+  (event: "select", group?: string): void;
+}>();
+
+const loading = ref(false);
+const applicationEditingModal = ref(false);
+const updateGroup = ref<Application>();
+const selectedGroup = useRouteQuery<string>("app-group");
+
+
+
+// 创建本地可写的分组列表副本
+const localGroups = ref<Application[]>([]);
+
+const { data: groups, refetch } = useQuery<Application[]>({
+  queryKey: [],
+  queryFn: async () => {
+    const { data } = await axiosInstance.get<ApplicationList>("/apis/console.api.apphub.erzip.com/v1alpha1/applications");
+    return data.items
+      .map((group) => {
+        if (group.spec) {
+          group.spec.priority = group.spec.priority || 0;
+        }
+        return group;
+      })
+      .sort((a, b) => {
+        return (a.spec?.priority || 0) - (b.spec?.priority || 0);
+      });
+  },
+  refetchInterval(data) {
+    const deletingGroups = data?.filter((group) => !!group.metadata.deletionTimestamp);
+    return deletingGroups?.length ? 1000 : false;
+  },
+  onSuccess(data) {
+    // 更新本地副本
+    localGroups.value = [...data];
+
+    if (selectedGroup.value) {
+      const groupNames = data.map((group) => group.metadata.name);
+      if (groupNames.includes(selectedGroup.value)) {
+        emit("select", selectedGroup.value);
+        return;
+      }
+    }
+
+    if (data.length) {
+      handleSelectedClick(data[0]);
+    } else {
+      selectedGroup.value = "";
+      emit("select", "");
+    }
+  },
+  refetchOnWindowFocus: false,
+});
+
+// 监听groups变化并更新本地副本（确保数据同步）
+watch(groups, (newVal) => {
+  if (newVal) {
+    localGroups.value = [...newVal];
+  }
+});
+
+const handleSaveInBatch = async () => {
+  console.log("开始保存顺序");
+  try {
+    // 使用本地副本进行保存
+    const promises = localGroups.value?.map((group: Application, index) => {
+      console.log("名称：",group.spec?.displayName)
+      console.log("当前顺序:", group.spec?.priority)
+      console.log("保存顺序",index)
+      if (group.spec) {
+        group.spec.priority = index;
+      }
+      return axiosInstance.put<Application>(`/apis/core.erzip.com/v1alpha1/applications/${group.metadata.name}`, group);
+    });
+
+    if (promises) {
+      await Promise.all(promises);
+      console.log("所有应用分组的顺序已成功保存");
+      // 保存成功后重新获取数据
+      refetch();
+    }
+  } catch (e) {
+    console.error("保存顺序时发生错误", e);
+    // 保存失败时回滚到原始数据
+    if (groups.value) {
+      localGroups.value = [...groups.value];
+    }
+  }
+};
+
+const handleDelete = async (group: Application) => {
+  Dialog.warning({
+    title: "确定要删除该分组吗？",
+    description: "将同时删除该分组下的所有应用版本，该操作不可恢复。",
+    confirmType: "danger",
+    onConfirm: async () => {
+      try {
+        await axiosInstance.delete(`/apis/console.api.apphub.erzip.com/v1alpha1/applications/${group.metadata.name}`);
+        refetch();
+      } catch (e) {
+        console.error("Failed to delete application", e);
+      }
+    },
+  });
+};
+
+const handleOpenEditingModal = (group?: Application) => {
+  applicationEditingModal.value = true;
+  updateGroup.value = group;
+};
+
+const handleSelectedClick = (group: Application) => {
+  selectedGroup.value = group.metadata.name;
+  emit("select", group.metadata.name);
+};
+
+const groupWithNull = computed(() => {
+  return updateGroup.value ?? null;
+});
+
+defineExpose({
+  refetch,
+});
+</script>
+
+<template>
+  <ApplicationEditingModal v-model:visible="applicationEditingModal" :group="groupWithNull" @close="refetch()" />
+  <VCard :body-class="['!p-0']" title="分组">
+    <VLoading v-if="loading" />
+    <Transition v-else-if="!groups || !groups.length" appear name="fade">
+      <VEmpty message="你可以尝试刷新或者新建分组" title="当前没有分组">
+        <template #actions>
+          <VSpace>
+            <VButton size="sm" @click="refetch()"> 刷新</VButton>
+          </VSpace>
+        </template>
+      </VEmpty>
+    </Transition>
+    <Transition v-else appear name="fade">
+      <div class="w-full overflow-x-auto">
+        <table class="w-full border-spacing-0">
+          <VueDraggable
+            v-model="localGroups"
+            class="divide-y divide-gray-100"
+            group="group"
+            handle=".drag-element"
+            item-key="metadata.name"
+            tag="tbody"
+            @update="handleSaveInBatch"
+          >
+            <VEntity
+              v-for="group in localGroups"
+              :key="group.metadata.name"
+              :is-selected="selectedGroup === group.metadata.name"
+              class="group"
+              @click="handleSelectedClick(group)"
+            >
+              <template #prepend>
+                <div
+                  class="drag-element absolute inset-y-0 left-0 hidden w-3.5 cursor-move items-center bg-gray-100 transition-all hover:bg-gray-200 group-hover:flex"
+                >
+                  <IconList class="h-3.5 w-3.5" />
+                </div>
+              </template>
+
+              <template #start>
+                <VEntityField
+                  :title="group.spec?.displayName"
+                  :description="`${group.status.releaseCount || 0} 个
+                  ${group.spec.type.toString() == 'PLUGIN'? '插件' : '主题'}版本`"
+                ></VEntityField>
+              </template>
+
+              <template #end>
+                <VEntityField v-if="group.metadata.deletionTimestamp">
+                  <template #description>
+                    <VStatusDot v-tooltip="`删除中`" state="warning" animate />
+                  </template>
+                </VEntityField>
+              </template>
+
+              <template #dropdownItems>
+                <VDropdownItem @click="handleOpenEditingModal(group)"> 修改 </VDropdownItem>
+                <VDropdownItem type="danger" @click="handleDelete(group)"> 删除 </VDropdownItem>
+              </template>
+            </VEntity>
+          </VueDraggable>
+        </table>
+      </div>
+    </Transition>
+
+    <template v-if="!loading" #footer>
+      <Transition appear name="fade">
+        <VButton
+          v-permission="['plugin:apphubs:manage']"
+          block
+          type="secondary"
+          @click="handleOpenEditingModal(undefined)"
+        >
+          新增分组
+        </VButton>
+      </Transition>
+    </template>
+  </VCard>
+</template>
