@@ -460,16 +460,23 @@
                         </div>
                         <div class="flex items-center">
                             <i class="far fa-calendar-alt mr-3 text-lg text-blue-500"></i>
-                            <span th:text="|最近更新: ${#temporals.format(group.releases[0].metadata.creationTimestamp, 'yyyy年MM月dd日 HH:mm')}|"></span>
+                            <span th:text="|最近更新: ${#temporals.format(latestRelease.status.publishTimestamp, 'yyyy年MM月dd日 HH:mm')}|"></span>
                         </div>
                     </div>
+                    <!-- 修复后的按钮代码 -->
                     <button id="downloadBtn" class="purchase-btn rounded-button text-white px-7 py-3.5 text-lg whitespace-nowrap font-medium">
-                        <i th:class="${app.priceConfig.mode.toString() == 'FREE' ? 'fas fa-download mr-2' : 'fas fa-shopping-cart mr-2'}"></i>
-                        <span th:if="${app.priceConfig.mode.toString() == 'FREE'}">免费下载</span>
-                        <span th:unless="${app.priceConfig.mode.toString() == 'FREE'}">
-            购买
-            <span class="ml-1">￥[[${#numbers.formatDecimal(app.priceConfig.oneTimePrice, 1, 2)}]]</span>
-        </span>
+                        <!-- 使用安全导航操作符 ?. 和 null 检查 -->
+                        <i th:class="${app.priceConfig?.mode != null and app.priceConfig.mode.toString() == 'FREE'} ?
+                                   'fas fa-download mr-2' : 'fas fa-shopping-cart mr-2'"></i>
+                        <span th:if="${app.priceConfig?.mode != null and app.priceConfig.mode.toString() == 'FREE'}">
+                            免费下载
+                        </span>
+                        <span th:unless="${app.priceConfig?.mode != null and app.priceConfig.mode.toString() == 'FREE'}">
+                            购买
+                            <span class="ml-1" th:if="${app.priceConfig?.oneTimePrice != null}">
+                                ￥[[${#numbers.formatDecimal(app.priceConfig.oneTimePrice, 1, 2)}]]
+                            </span>
+                        </span>
                     </button>
                 </div>
                 <img th:src="${app.cover}" th:alt="${app.displayName}" class="plugin-thumbnail w-full md:w-96 h-auto rounded-2xl object-cover shadow-xl border-4 border-white" />
@@ -491,7 +498,7 @@
             </div>
 
             <!-- 最新版本内容 -->
-            <div id="latest-version" class="content-section active mt-8" th:with="latestRelease=${group.releases[0].spec}">
+            <div id="latest-version" class="content-section active mt-8" th:with="latest=${latestRelease.spec}">
                 <div class="version-card p-8 rounded-2xl">
                     <div class="flex items-center justify-between mb-6">
                         <h2 class="text-2xl font-bold text-gray-900">最新版本信息</h2>
@@ -506,7 +513,7 @@
                                 </div>
                                 <div>
                                     <h3 class="text-sm font-medium text-gray-500">当前版本</h3>
-                                    <p class="font-bold text-xl text-gray-800" th:text="${latestRelease.version}"></p>
+                                    <p class="font-bold text-xl text-gray-800" th:text="${latest.version}"></p>
                                 </div>
                             </div>
                         </div>
@@ -518,7 +525,7 @@
                                 </div>
                                 <div>
                                     <h3 class="text-sm font-medium text-gray-500">发布日期</h3>
-                                    <p class="font-bold text-xl text-gray-800" th:text="${#temporals.format(group.releases[0].metadata.creationTimestamp, 'yyyy年MM月dd日 HH:mm')}"></p>
+                                    <p class="font-bold text-xl text-gray-800" th:text="${#temporals.format(latestRelease.status.publishTimestamp, 'yyyy年MM月dd日 HH:mm')}"></p>
                                 </div>
                             </div>
                         </div>
@@ -530,7 +537,7 @@
                                 </div>
                                 <div>
                                     <h3 class="text-sm font-medium text-gray-500">版本要求</h3>
-                                    <p class="font-bold text-xl text-gray-800" th:text="${latestRelease.requires}"></p>
+                                    <p class="font-bold text-xl text-gray-800" th:text="${latest.requires}"></p>
                                 </div>
                             </div>
                         </div>
@@ -582,8 +589,8 @@
                             <span th:if="${iterStat.index == 0}" class="version-badge bg-green/10 text-green">最新版本</span>
                             <span class="text-gray-500 text-base">
                                 <i class="far fa-clock mr-2"></i>
-                                <span th:attr="data-timestamp=${item.metadata.creationTimestamp}" class="relative-time">
-                                    发布于 [[${#temporals.format(item.metadata.creationTimestamp, 'yyyy-MM-dd')}]]
+                                <span th:attr="data-timestamp=${item.status.publishTimestamp}" class="relative-time">
+                                    发布于 [[${#temporals.format(item.status.publishTimestamp, 'yyyy-MM-dd')}]]
                                 </span>
                             </span>
                             <span class="text-gray-500 text-base"><i class="fas fa-code-branch mr-2"></i>[[${item.spec.requires}]]</span>
@@ -677,7 +684,7 @@
                         <ul class="text-gray-700 space-y-2">
                             <li class="flex items-start">
                                 <i class="fas fa-check-circle text-blue-500 mt-1 mr-2"></i>
-                                <span th:text="|确保您的Halo版本 ${group.releases[0].spec.requires} |"></span>
+                                <span th:text="|确保您的Halo版本 ${latestRelease.spec.requires} |"></span>
                             </li>
                             <li class="flex items-start">
                                 <i class="fas fa-check-circle text-blue-500 mt-1 mr-2"></i>
@@ -915,7 +922,7 @@
         // =============================
 
         // 获取名称（通过Thymeleaf变量）
-        const releaseAppName = /*[[${group.releases[0].metadata.name}]]*/ '#';
+        const releaseAppName = /*[[${latestRelease.metadata.name}]]*/ '#';
         // 构建API URL
         const downloadApiUrl = SITE_URL+`/apis/api.apphub.erzip.com/v1alpha1/download/`+releaseAppName;
         // 获取所有标签页

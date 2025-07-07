@@ -66,7 +66,6 @@ export interface ReleaseSpec {
   packageSize: string;
   url: string;
   updateSpecs: UpdateSpec[];
-  publishTimestamp: Date;
   priority?: number;
   groupName: string;
 }
@@ -82,11 +81,15 @@ export interface Note{
 
 export interface Release {
   spec: ReleaseSpec;
+  status: ReleaseStatus;
   apiVersion: string;
   kind: string;
   metadata: Metadata;
 }
 
+export interface ReleaseStatus{
+  publishTimestamp: Date;
+}
 
 export interface Application {
   spec: ApplicationSpec;

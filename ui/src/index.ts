@@ -10,8 +10,8 @@ export default definePlugin({
     {
       parentName: "Root",
       route: {
-        path: "/apps",
-        name: "Apps",
+        path: "/app-hubs",
+        name: "App-hubs",
         component: AppList,
         meta: {
           permissions: ["plugin:apphubs:view"],
@@ -25,23 +25,5 @@ export default definePlugin({
     },
   ],
   extensionPoints: {
-    "comment:subject-ref:create": (): CommentSubjectRefProvider[] => {
-      return [
-        {
-          kind: "ApplicationComment",
-          group: "core.erzip.com",
-          resolve: (subject: Extension): CommentSubjectRefResult => {
-            return {
-              label: "应用舱",
-              title: "应用舱页面",
-              externalUrl: "/apps",
-              route: {
-                name: "Apps",
-              },
-            };
-          },
-        },
-      ];
-    },
   },
 });

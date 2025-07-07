@@ -18,7 +18,7 @@ import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 @GVK(group = "core.erzip.com",version = "v1alpha1", kind = "Release", plural = "releases", singular = "release")
 public class Release extends AbstractExtension {
     private ReleaseSpec spec;
-
+    private ReleaseStatus status;
 
     @Data
     public class ReleaseSpec {
@@ -40,14 +40,27 @@ public class Release extends AbstractExtension {
         @Schema(requiredMode = REQUIRED, description = "更新描述")
         private List<UpdateSpec> updateSpecs;
 
-        @Schema(description = "发布时间戳", example = "2025-06-17T07:48:38.457152531Z")
-        private Instant publishTimestamp;
         private Integer priority;
 
         @Schema(requiredMode = REQUIRED,pattern = "^\\S+$",description = "分组名称")
         private String groupName;
     }
 
+    @JsonIgnore
+    public ReleaseStatus getStatusOrDefault(){
+        if (this.status == null){
+            this.status = new ReleaseStatus();
+        }
+        return this.status;
+    }
+
+
+
+    @Data
+    public static class ReleaseStatus{
+        @Schema(description = "发布时间戳", example = "2025-06-17T07:48:38.457152531Z")
+        private Instant publishTimestamp;
+    }
 
     @Data
     public static class UpdateSpec{

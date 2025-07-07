@@ -38,8 +38,10 @@ const initialFormState: Release = {
     url: "",
     groupName: props.group || "",
     updateSpecs: [], // 初始化为空数组（符合 UpdateSpec[] 类型）
-    publishTimestamp: new Date(), // 初始化为当前日期
     priority: 0, // 可选属性建议初始化默认值
+  },
+  status:{
+    publishTimestamp: new Date(), // 初始化为当前日期
   },
   kind: "Release",
   apiVersion: "core.erzip.com/v1alpha1",

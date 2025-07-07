@@ -53,6 +53,9 @@ public class AppRouter {
         return templateNameResolver.resolveTemplateNameOrDefault(request.exchange(), "app-detail")
             .flatMap(templateName -> ServerResponse.ok().render(templateName,
                     Map.of("group", application,
+                        "latestRelease",application.flatMap(app -> {
+                            return Mono.just(app.releases().get(0));
+                        }),
                         "title", getAppsTitle()
                         )
             ));
@@ -106,7 +109,8 @@ public class AppRouter {
                         // 返回更新后的 ReleaseVo
                         return new ReleaseVo(
                             releaseVo.metadata(),
-                            originalSpec
+                            originalSpec,
+                            releaseVo.status()
                         );
                     })
                     .collect(Collectors.toList());
