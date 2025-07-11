@@ -1,6 +1,18 @@
 apiVersion: v1alpha1
 kind: Role
 metadata:
+  name: template-apphubs-anonymous-resources
+  labels:
+    halo.run/role-template: "true"
+    rbac.authorization.halo.run/aggregate-to-anonymous: "true"
+rules:
+  - apiGroups: ["api.apphub.erzip.com"]
+    resources: ["download","viewcount"]
+    verbs: ["get", "list"]
+---
+apiVersion: v1alpha1
+kind: Role
+metadata:
   name: role-template-apphubs-view
   labels:
     halo.run/role-template: "true"
@@ -26,5 +38,5 @@ metadata:
     rbac.authorization.halo.run/display-name: "应用管理"
 rules:
   - apiGroups: [ "core.erzip.com", "console.api.apphub.erzip.com"]
-    resources: [ "releases", "applications", "applicationcomments","download","app"]
+    resources: [ "releases", "applications", "applicationcomments"]
     verbs: [ "create", "patch", "update", "delete", "deletecollection" ]

@@ -208,24 +208,21 @@ public class ApplicationServiceImpl implements ApplicationService {
                 // 2. 处理付费模式并传递结果
                 return this.client.fetch(Application.class, groupName)
                     .switchIfEmpty(Mono.error(new RuntimeException("未找到应用分组: " + groupName)))
-                    .flatMap(app -> {
+                    .map(app -> {
                         boolean isOneTime = app.getSpec().getPriceConfig().getMode().equals(Application.ModeType.ONE_TIME);
-
-                        // 3. 更新下载次数并传递结果
-                        return updateDownloadCount(groupName)
-                            .thenReturn(Tuples.of(release, isOneTime));  // 传递release和付费模式
+                        return Tuples.of(release, isOneTime, groupName); // 添加groupName到元组
                     });
             })
             .flatMap(tuple -> {
-                boolean isOneTime = tuple.getT2();
                 Release release = tuple.getT1();
+                boolean isOneTime = tuple.getT2();
+                String groupName = tuple.getT3(); // 从元组获取groupName
+
                 // 3. 处理URL返回逻辑
                 Release.ReleaseSpec spec = release.getSpec();
                 if (spec == null) {
                     return Mono.error(new IllegalStateException("应用规格为空"));
                 }
-
-
 
                 // 根据付费模式决定URL值
                 String url = isOneTime ? "#" : spec.getUrl();
@@ -233,7 +230,13 @@ public class ApplicationServiceImpl implements ApplicationService {
                     return Mono.error(new IllegalStateException("应用URL为空"));
                 }
 
-                return Mono.just(new DownLoadVo(url));
+                if ("#".equals(url)){
+                    return Mono.just(new DownLoadVo(url));
+                }
+
+                // 4. 在返回前更新下载计数
+                return updateDownloadCount(groupName)
+                    .thenReturn(new DownLoadVo(url)); // 确保计数更新完成后再返回结果
             });
     }
 
