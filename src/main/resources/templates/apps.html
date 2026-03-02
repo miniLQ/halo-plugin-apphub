@@ -219,17 +219,20 @@
     </header>
 
     <main class="container mx-auto px-4 sm:px-6 py-8 md:py-12">
-        <!-- 主题部分 -->
+        <!-- 软件精选部分 -->
         <section class="mb-12 md:mb-16">
             <div class="section-card p-6 md:p-8">
                 <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8">
-                    <h2 class="text-2xl md:text-3xl font-bold mb-2 md:mb-0">主题</h2>
-                    <div class="flex items-center">
-                        <span class="text-gray-600 mr-3">标签：</span>
+                    <div>
+                        <h2 class="text-2xl md:text-3xl font-bold mb-2 md:mb-1">软件精选</h2>
+                        <p class="text-gray-600 text-base">收集与自研的软件、工具、资料，按类别整理</p>
+                    </div>
+                    <div class="flex items-center mt-4 md:mt-0">
+                        <span class="text-gray-600 mr-3">分类：</span>
                         <div class="flex space-x-2">
-                            <span class="bg-blue-100 text-primary text-xs px-3 py-1.5 rounded-full font-medium">Halo</span>
-<!--                            <span class="bg-purple-100 text-secondary text-xs px-3 py-1.5 rounded-full font-medium">企业</span>-->
-<!--                            <span class="bg-yellow-100 text-yellow-700 text-xs px-3 py-1.5 rounded-full font-medium">博客</span>-->
+                            <span class="bg-blue-100 text-primary text-xs px-3 py-1.5 rounded-full font-medium">开发工具</span>
+                            <span class="bg-purple-100 text-secondary text-xs px-3 py-1.5 rounded-full font-medium">效率</span>
+                            <span class="bg-green-100 text-green-700 text-xs px-3 py-1.5 rounded-full font-medium">学习资料</span>
                         </div>
                     </div>
                 </div>
@@ -239,8 +242,8 @@
                     <div id="empty-themes" class="empty-state" th:if="${#lists.isEmpty(themes)}">
                         <div class="empty-state-content">
                             <i class="fas fa-paint-brush empty-icon"></i>
-                            <h3 class="text-2xl md:text-3xl font-bold text-gray-800 mb-3">暂无主题</h3>
-                            <p class="text-gray-600 text-lg mb-4 max-w-md">当前没有可用的主题，正在努力创作中</p>
+                            <h3 class="text-2xl md:text-3xl font-bold text-gray-800 mb-3">暂无资源</h3>
+                            <p class="text-gray-600 text-lg mb-4 max-w-md">这里将展示软件、工具或资料，稍后再来看看</p>
                             <p class="text-gray-500 text-sm mb-6">敬请期待！</p>
                         </div>
                         <div class="empty-state-bg">
@@ -260,8 +263,8 @@
                                 <div class="mb-3">
                                     <h3 class="text-lg font-bold mb-1" th:text="${theme.spec.displayName}"></h3>
                                     <div class="flex items-center space-x-2">
-                                        <span class="bg-blue-100 text-primary text-xs px-2 py-1 rounded">Halo</span>
-                                        <span class="bg-purple-100 text-secondary text-xs px-2 py-1 rounded">主题</span>
+                                        <span class="bg-blue-100 text-primary text-xs px-2 py-1 rounded">软件</span>
+                                        <span class="bg-purple-100 text-secondary text-xs px-2 py-1 rounded">资源</span>
                                     </div>
                                 </div>
                                 <p class="text-gray-600 text-sm mb-4" th:text="${theme.spec.description}"></p>
@@ -290,16 +293,8 @@
             <div class="section-card p-6 md:p-8">
                 <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8">
                     <div>
-                        <h2 class="text-2xl md:text-3xl font-bold mb-2">精选插件</h2>
-                        <p class="text-gray-600 text-lg">丰富的功能扩展，让您的网站焕然一新</p>
-                    </div>
-                    <div class="flex items-center mt-4 md:mt-0">
-                        <span class="text-gray-600 mr-3">标签：</span>
-                        <div class="flex space-x-2">
-                            <span class="bg-blue-100 text-primary text-xs px-3 py-1.5 rounded-full font-medium">Halo</span>
-<!--                            <span class="bg-purple-100 text-secondary text-xs px-3 py-1.5 rounded-full font-medium">安全</span>-->
-<!--                            <span class="bg-yellow-100 text-yellow-700 text-xs px-3 py-1.5 rounded-full font-medium">社交</span>-->
-                        </div>
+                        <h2 class="text-2xl md:text-3xl font-bold mb-2">资源</h2>
+                        <p class="text-gray-600 text-lg">丰富的资源，总有一款适合你</p>
                     </div>
                 </div>
 
@@ -353,7 +348,7 @@
     <footer class="bg-gray-50 border-t mt-16 py-6">
         <div class="container mx-auto px-4 sm:px-6">
             <div class="text-center text-gray-500 text-sm">
-                &copy; 2025 星风之痕.保留所有权利.
+                &copy; 2024 云栖梦泽.保留所有权利.
             </div>
         </div>
     </footer>
