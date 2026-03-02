@@ -887,13 +887,12 @@
 <div class="download-modal" id="downloadModal">
     <div class="modal-content">
         <div class="modal-header">
-            <h2 class="text-2xl font-bold">选择下载方式</h2>
-            <p class="mt-2 opacity-90">请选择最适合您的安装方式</p>
+            <h2 class="text-2xl font-bold">GOGOGO</h2>
         </div>
 
         <div class="modal-body">
-            <div class="download-option">
-                <h3><i class="fas fa-download text-green-500"></i>方式一：直接下载</h3>
+            <div class="download-option" th:if="${!#strings.isEmpty(latestRelease.spec.packageSize) and latestRelease.spec.packageSize != '0'}">
+                <h3><i class="fas fa-download text-green-500"></i>直接下载</h3>
                 <p class="text-gray-600 mb-4">获取直链并开始下载</p>
 
                 <button id="directDownload" class="direct-download">
@@ -901,9 +900,9 @@
                 </button>
             </div>
 
-            <div class="download-option">
-                <h3><i class="fas fa-external-link-alt text-blue-500"></i>方式二：打开链接查看</h3>
-                <p class="text-gray-600 mb-4">在新窗口中打开下载链接，手动查看或复制</p>
+            <div class="download-option" th:if="${#strings.isEmpty(latestRelease.spec.packageSize) or latestRelease.spec.packageSize == '0'}">
+                <h3><i class="fas fa-external-link-alt text-blue-500"></i>跳转查看</h3>
+                <p class="text-gray-600 mb-4">在新窗口中打开链接，手动查看或复制</p>
 
                 <button id="openLink" class="direct-download" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);">
                     <i class="fas fa-external-link-alt"></i>打开链接
@@ -1132,26 +1131,28 @@
         });
 
         // 直接下载按钮功能
-        directDownloadBtn.addEventListener('click', async function() {
-            await triggerDownload();
+        if (directDownloadBtn) {
+            directDownloadBtn.addEventListener('click', async function() {
+                await triggerDownload();
 
-            // 关闭模态框
-            downloadModal.classList.remove('active');
-            document.body.style.overflow = '';
-        });
+                downloadModal.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+        }
 
-        // 打开链接查看
-        openLinkBtn.addEventListener('click', async function() {
-            const downloadUrl = await fetchDownloadUrl();
-            if (!downloadUrl) {
-                return;
-            }
-            window.open(downloadUrl, '_blank');
+        if (openLinkBtn) {
+            openLinkBtn.addEventListener('click', async function() {
+                const downloadUrl = await fetchDownloadUrl();
+                if (!downloadUrl) {
+                    return;
+                }
+                window.open(downloadUrl, '_blank');
 
-            downloadNotification.classList.remove('show');
-            downloadModal.classList.remove('active');
-            document.body.style.overflow = '';
-        });
+                downloadNotification.classList.remove('show');
+                downloadModal.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+        }
 
         // 手动下载链接（打开模态框）
         const manualDownloadLink = document.getElementById('manualDownload');
