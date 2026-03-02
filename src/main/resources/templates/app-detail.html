@@ -475,13 +475,15 @@
                     </div>
                     <!-- 修复后的按钮代码 -->
                     <button id="downloadBtn" class="purchase-btn rounded-button text-white px-7 py-3.5 text-lg whitespace-nowrap font-medium">
-                        <!-- 使用安全导航操作符 ?. 和 null 检查 -->
-                        <i th:class="${app.priceConfig?.mode != null and app.priceConfig.mode.toString() == 'FREE'} ?
+                        <i th:if="${latestRelease.spec.packageSize <= 0}" class="fas fa-external-link-alt mr-2"></i>
+                        <span th:if="${latestRelease.spec.packageSize <= 0}">跳转查看</span>
+
+                        <i th:if="${latestRelease.spec.packageSize > 0}" th:class="${app.priceConfig?.mode != null and app.priceConfig.mode.toString() == 'FREE'} ?
                                    'fas fa-download mr-2' : 'fas fa-shopping-cart mr-2'"></i>
-                        <span th:if="${app.priceConfig?.mode != null and app.priceConfig.mode.toString() == 'FREE'}">
+                        <span th:if="${latestRelease.spec.packageSize > 0 and app.priceConfig?.mode != null and app.priceConfig.mode.toString() == 'FREE'}">
                             免费下载
                         </span>
-                        <span th:unless="${app.priceConfig?.mode != null and app.priceConfig.mode.toString() == 'FREE'}">
+                        <span th:if="${latestRelease.spec.packageSize > 0 and (app.priceConfig?.mode == null or app.priceConfig.mode.toString() != 'FREE')}">
                             购买
                             <span class="ml-1" th:if="${app.priceConfig?.oneTimePrice != null}">
                                 ￥[[${#numbers.formatDecimal(app.priceConfig.oneTimePrice, 1, 2)}]]
@@ -500,7 +502,7 @@
             <!-- 顶部导航 -->
             <div class="nav-tabs flex items-center border-b border-gray-200 pb-2 overflow-x-auto">
                 <a href="#" class="tab-active px-4 py-4 text-base font-medium whitespace-nowrap nav-tab" data-target="latest-version">最新版本</a>
-                <a href="#" class="text-gray-600 hover:text-primary px-4 py-4 text-base font-medium whitespace-nowrap nav-tab" data-target="recent-updates">最近更新</a>
+                    <a href="#" class="text-gray-600 hover:text-primary px-4 py-4 text-base font-medium whitespace-nowrap nav-tab" data-target="recent-updates" th:if="${latestRelease.spec.packageSize > 0}">最近更新</a>
                 <!-- 新增应用截图标签 -->
                 <a href="#" class="text-gray-600 hover:text-primary px-4 py-4 text-base font-medium whitespace-nowrap nav-tab" data-target="screenshots">应用截图</a>
                 <!-- <a href="#" class="text-gray-600 hover:text-primary px-4 py-4 text-base font-medium whitespace-nowrap nav-tab" data-target="installation">安装指南</a> -->
@@ -571,7 +573,7 @@
                         </p>
                     </div>
 
-                    <div class="mt-8">
+                    <div class="mt-8" th:if="${latestRelease.spec.packageSize > 0}">
                         <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded">
                             <div class="flex items-start">
                                 <div class="flex-shrink-0">
@@ -590,7 +592,7 @@
             </div>
 
             <!-- 最近更新内容 -->
-            <div id="recent-updates" class="content-section mt-8">
+            <div id="recent-updates" class="content-section mt-8" th:if="${latestRelease.spec.packageSize > 0}">
                 <th:block th:each="item, iterStat : ${group.releases}">
                     <!-- 25.5.0 版本 -->
                     <div class="pt-6 border-t border-gray-100">
@@ -623,7 +625,7 @@
                                 版本附件下载
                             </h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                <a th:data-releaseName="${item.metadata.name}" href="#" class="attachment-card p-5 rounded-xl flex items-center">
+                                <a th:data-releaseName="${item.metadata.name}" th:data-packageSize="${item.spec.packageSize}" href="#" class="attachment-card p-5 rounded-xl flex items-center">
                                     <div class="w-12 h-12 rounded-lg bg-blue-50 flex items-center justify-center mr-4">
                                         <i class="fas fa-file-archive text-blue-500 text-xl"></i>
                                     </div>
@@ -891,30 +893,21 @@
 
         <div class="modal-body">
             <div class="download-option">
-                <h3><i class="fas fa-plug text-blue-500"></i>方式一：远程安装</h3>
-                <p class="text-gray-600 mb-4">输入您的 Halo 后台地址，自动跳转到安装页面</p>
+                <h3><i class="fas fa-download text-green-500"></i>方式一：直接下载</h3>
+                <p class="text-gray-600 mb-4">获取直链并开始下载</p>
 
-                <div class="input-group">
-                    <input type="text" id="haloUrl" placeholder="https://您的域名" value="https://">
-                    <button id="installBtn">安装</button>
-                </div>
-
-                <div class="download-tip">
-                    安装地址示例：https://example.com
-                </div>
+                <button id="directDownload" class="direct-download">
+                    <i class="fas fa-download"></i>立即下载
+                </button>
             </div>
 
             <div class="download-option">
-                <h3><i class="fas fa-download text-green-500"></i>方式二：直接下载</h3>
-                <p class="text-gray-600 mb-4">下载插件文件后手动安装</p>
+                <h3><i class="fas fa-external-link-alt text-blue-500"></i>方式二：打开链接查看</h3>
+                <p class="text-gray-600 mb-4">在新窗口中打开下载链接，手动查看或复制</p>
 
-                <button id="directDownload" class="direct-download">
-                    <i class="fas fa-download"></i>下载插件文件
+                <button id="openLink" class="direct-download" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);">
+                    <i class="fas fa-external-link-alt"></i>打开链接
                 </button>
-
-                <div class="download-tip">
-                    下载后，请转到 Halo 后台的"插件" > "安装"页面，上传此文件完成安装。
-                </div>
             </div>
         </div>
     </div>
@@ -1120,14 +1113,8 @@
 
         // 新增下载模态框功能
         const downloadModal = document.getElementById('downloadModal');
-        const installBtn = document.getElementById('installBtn');
         const directDownloadBtn = document.getElementById('directDownload');
-        const haloUrlInput = document.getElementById('haloUrl');
-
-        // 安装指南部分的按钮
-        const installBtn2 = document.getElementById('installBtn2');
-        const manualDownloadInInstallation = document.getElementById('manualDownloadInInstallation');
-        const haloUrlInput2 = document.getElementById('haloUrl2');
+        const openLinkBtn = document.getElementById('openLink');
 
         // 打开下载模态框
         document.getElementById('downloadBtn').addEventListener('click', function(e) {
@@ -1144,66 +1131,6 @@
             }
         });
 
-        // 安装按钮功能（模态框中的）
-        installBtn.addEventListener('click', async function() {
-            const baseUrl = haloUrlInput.value.trim();
-            if (!baseUrl) {
-                alert('请输入您的Halo后台地址');
-                return;
-            }
-
-            // 确保URL格式正确
-            let cleanUrl = baseUrl;
-            if (cleanUrl.endsWith('/')) {
-                cleanUrl = cleanUrl.slice(0, -1);
-            }
-
-            // 获取动态插件URL
-            const pluginUrl = await fetchDownloadUrl();
-            if (!pluginUrl) {
-                alert('获取插件下载地址失败');
-                return;
-            }
-
-            // 构建安装URL
-            const installUrl = `${cleanUrl}/console/plugins?remote-download-url=${encodeURIComponent(pluginUrl)}`;
-
-            // 在新窗口中打开安装URL
-            window.open(installUrl, '_blank');
-
-            // 关闭模态框
-            downloadModal.classList.remove('active');
-            document.body.style.overflow = '';
-        });
-
-        // 安装指南部分的安装按钮
-        installBtn2.addEventListener('click', async function() {
-            const baseUrl = haloUrlInput2.value.trim();
-            if (!baseUrl) {
-                alert('请输入您的Halo后台地址');
-                return;
-            }
-
-            // 确保URL格式正确
-            let cleanUrl = baseUrl;
-            if (cleanUrl.endsWith('/')) {
-                cleanUrl = cleanUrl.slice(0, -1);
-            }
-
-            // 获取动态插件URL
-            const pluginUrl = await fetchDownloadUrl();
-            if (!pluginUrl) {
-                alert('获取插件下载地址失败');
-                return;
-            }
-
-            // 构建安装URL
-            const installUrl = `${cleanUrl}/console/plugins?remote-download-url=${encodeURIComponent(pluginUrl)}`;
-
-            // 在新窗口中打开安装URL
-            window.open(installUrl, '_blank');
-        });
-
         // 直接下载按钮功能
         directDownloadBtn.addEventListener('click', async function() {
             await triggerDownload();
@@ -1213,32 +1140,28 @@
             document.body.style.overflow = '';
         });
 
-        // 安装指南中的下载按钮
-        manualDownloadInInstallation.addEventListener('click', async function(e) {
-            e.preventDefault();
-            await triggerDownload();
+        // 打开链接查看
+        openLinkBtn.addEventListener('click', async function() {
+            const downloadUrl = await fetchDownloadUrl();
+            if (!downloadUrl) {
+                return;
+            }
+            window.open(downloadUrl, '_blank');
+
+            downloadNotification.classList.remove('show');
+            downloadModal.classList.remove('active');
+            document.body.style.overflow = '';
         });
 
         // 手动下载链接（打开模态框）
-        document.getElementById('manualDownload').addEventListener('click', function(e) {
-            e.preventDefault();
-            downloadModal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        });
-
-        // 支持按回车键触发安装
-        haloUrlInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                installBtn.click();
-            }
-        });
-
-        // 支持按回车键触发安装（安装指南部分）
-        haloUrlInput2.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                installBtn2.click();
-            }
-        });
+        const manualDownloadLink = document.getElementById('manualDownload');
+        if (manualDownloadLink) {
+            manualDownloadLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                downloadModal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            });
+        }
 
 
         // ========= 附件下载功能 =========
@@ -1247,8 +1170,8 @@
             card.addEventListener('click', async function(e) {
                 e.preventDefault();
 
-                // 获取卡片上的设备名称
                 const releaseName = this.getAttribute('data-releaseName');
+                const packageSize = parseFloat(this.getAttribute('data-packageSize'));
                 if (!releaseName) {
                     notificationText.textContent = "获取下载信息失败";
                     downloadNotification.classList.add('show');
@@ -1256,7 +1179,6 @@
                     return;
                 }
 
-                // 构建下载API URL
                 const attachmentDownloadUrl = SITE_URL + `/apis/api.apphub.erzip.com/v1alpha1/download/${releaseName}`;
 
                 try {
@@ -1273,13 +1195,15 @@
                         throw new Error('无效的下载链接');
                     }
 
-                    // 触发下载
-                    window.location.href = data.url;
+                    if (isNaN(packageSize) || packageSize <= 0) {
+                        // 尺寸为0或缺失：当作链接打开查看/复制
+                        window.open(data.url, '_blank');
+                    } else {
+                        // 有实际文件大小：直接触发下载
+                        window.location.href = data.url;
+                    }
 
-                    // 更新通知文本
                     notificationText.textContent = "下载已开始！";
-
-                    // 5秒后自动隐藏通知
                     setTimeout(() => {
                         downloadNotification.classList.remove('show');
                     }, 5000);
