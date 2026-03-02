@@ -11,7 +11,7 @@ spec:
           label: 页面标题
           name: title
           validation: required
-          value: "应用"
+          value: "应用舱"
         - $formkit: text
           label: 应用列表显示条数
           name: pageSize
