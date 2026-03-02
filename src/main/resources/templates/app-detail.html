@@ -475,15 +475,15 @@
                     </div>
                     <!-- 修复后的按钮代码 -->
                     <button id="downloadBtn" class="purchase-btn rounded-button text-white px-7 py-3.5 text-lg whitespace-nowrap font-medium">
-                        <i th:if="${latestRelease.spec.packageSize <= 0}" class="fas fa-external-link-alt mr-2"></i>
-                        <span th:if="${latestRelease.spec.packageSize <= 0}">跳转查看</span>
+                        <i th:if="${#strings.isEmpty(latestRelease.spec.packageSize) or latestRelease.spec.packageSize == '0'}" class="fas fa-external-link-alt mr-2"></i>
+                        <span th:if="${#strings.isEmpty(latestRelease.spec.packageSize) or latestRelease.spec.packageSize == '0'}">跳转查看</span>
 
-                        <i th:if="${latestRelease.spec.packageSize > 0}" th:class="${app.priceConfig?.mode != null and app.priceConfig.mode.toString() == 'FREE'} ?
+                        <i th:if="${!#strings.isEmpty(latestRelease.spec.packageSize) and latestRelease.spec.packageSize != '0'}" th:class="${app.priceConfig?.mode != null and app.priceConfig.mode.toString() == 'FREE'} ?
                                    'fas fa-download mr-2' : 'fas fa-shopping-cart mr-2'"></i>
-                        <span th:if="${latestRelease.spec.packageSize > 0 and app.priceConfig?.mode != null and app.priceConfig.mode.toString() == 'FREE'}">
+                        <span th:if="${!#strings.isEmpty(latestRelease.spec.packageSize) and latestRelease.spec.packageSize != '0' and app.priceConfig?.mode != null and app.priceConfig.mode.toString() == 'FREE'}">
                             免费下载
                         </span>
-                        <span th:if="${latestRelease.spec.packageSize > 0 and (app.priceConfig?.mode == null or app.priceConfig.mode.toString() != 'FREE')}">
+                        <span th:if="${!#strings.isEmpty(latestRelease.spec.packageSize) and latestRelease.spec.packageSize != '0' and (app.priceConfig?.mode == null or app.priceConfig.mode.toString() != 'FREE')}">
                             购买
                             <span class="ml-1" th:if="${app.priceConfig?.oneTimePrice != null}">
                                 ￥[[${#numbers.formatDecimal(app.priceConfig.oneTimePrice, 1, 2)}]]
@@ -502,7 +502,7 @@
             <!-- 顶部导航 -->
             <div class="nav-tabs flex items-center border-b border-gray-200 pb-2 overflow-x-auto">
                 <a href="#" class="tab-active px-4 py-4 text-base font-medium whitespace-nowrap nav-tab" data-target="latest-version">最新版本</a>
-                    <a href="#" class="text-gray-600 hover:text-primary px-4 py-4 text-base font-medium whitespace-nowrap nav-tab" data-target="recent-updates" th:if="${latestRelease.spec.packageSize > 0}">最近更新</a>
+                    <a href="#" class="text-gray-600 hover:text-primary px-4 py-4 text-base font-medium whitespace-nowrap nav-tab" data-target="recent-updates" th:if="${!#strings.isEmpty(latestRelease.spec.packageSize) and latestRelease.spec.packageSize != '0'}">最近更新</a>
                 <!-- 新增应用截图标签 -->
                 <a href="#" class="text-gray-600 hover:text-primary px-4 py-4 text-base font-medium whitespace-nowrap nav-tab" data-target="screenshots">应用截图</a>
                 <!-- <a href="#" class="text-gray-600 hover:text-primary px-4 py-4 text-base font-medium whitespace-nowrap nav-tab" data-target="installation">安装指南</a> -->
@@ -573,7 +573,7 @@
                         </p>
                     </div>
 
-                    <div class="mt-8" th:if="${latestRelease.spec.packageSize > 0}">
+                    <div class="mt-8" th:if="${!#strings.isEmpty(latestRelease.spec.packageSize) and latestRelease.spec.packageSize != '0'}">
                         <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded">
                             <div class="flex items-start">
                                 <div class="flex-shrink-0">
@@ -592,7 +592,7 @@
             </div>
 
             <!-- 最近更新内容 -->
-            <div id="recent-updates" class="content-section mt-8" th:if="${latestRelease.spec.packageSize > 0}">
+            <div id="recent-updates" class="content-section mt-8" th:if="${!#strings.isEmpty(latestRelease.spec.packageSize) and latestRelease.spec.packageSize != '0'}">
                 <th:block th:each="item, iterStat : ${group.releases}">
                     <!-- 25.5.0 版本 -->
                     <div class="pt-6 border-t border-gray-100">
